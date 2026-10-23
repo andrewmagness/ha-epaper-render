@@ -68,6 +68,54 @@ text stays pure black, red or blue.
 
 The image is built locally, so update it with `docker compose build --pull && docker compose up -d`.
 
+### Compose example
+
+This is the `docker-compose.yml` in this repo, with secrets read from `.env`:
+
+```yaml
+services:
+  epaper-render:
+    build: .                        # Dockerfile in this repo
+    image: local/epaper-render:latest
+    container_name: epaper-render
+    restart: unless-stopped
+    init: true
+    shm_size: 512m                  # Chromium needs more than Docker's 64 MB default
+    ports:
+      - "6161:8080"                 # the display fetches http://<host>:6161/display.png
+    environment:
+      TZ: America/Chicago
+      HA_BASE_URL: http://homeassistant.local:8123
+      HA_DASHBOARD_PATH: /my-dashboard/0?kiosk
+      HA_TOKEN: ${HA_TOKEN}         # long-lived access token, from .env
+      WIDTH: "800"
+      HEIGHT: "480"
+      RENDER_INTERVAL: "300"
+      DITHER_DIFFUSION: "65%"
+      STALE_ALERT_MINUTES: "30"
+      # Optional Telegram alert when no good render for STALE_ALERT_MINUTES
+      TG_TOKEN: ${TG_TOKEN:-}
+      TG_CHAT: ${TG_CHAT:-}
+    volumes:
+      - epaper-render-data:/data    # keeps the last good image across restarts
+
+volumes:
+  epaper-render-data:
+```
+
+With a three-colour (black/white/red) panel at a different size, change these:
+
+```yaml
+    environment:
+      WIDTH: "400"
+      HEIGHT: "300"
+      PALETTE: "#FFFFFF #000000 #FF0000"
+```
+
+If you manage stacks in a UI (Portainer, Dockhand, …) that can't build from a
+Dockerfile, build once with `docker build -t local/epaper-render:latest .` and
+remove the `build:` line. The stack then uses the local image.
+
 ## Configuration
 
 | Variable | Default | |
