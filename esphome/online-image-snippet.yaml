@@ -1,0 +1,33 @@
+# Relevant part of the ESPHome config for a Waveshare 7.3" Spectra E6 panel on an
+# ESP32-S3 that deep-sleeps between refreshes. Pins are for that board; adjust yours.
+http_request:
+  verify_ssl: false
+  timeout: 10s
+  watchdog_timeout: 15s
+
+online_image:
+  - id: dashboard_image
+    format: PNG
+    type: RGB565
+    update_interval: 50s
+    url: http://192.168.1.10:6161/display.png   # host running epaper-render
+    on_download_finished:
+      - component.update: epaper_display
+
+display:
+  - platform: epaper_spi
+    id: epaper_display
+    model: 7.3in-Spectra-E6
+    cs_pin: GPIO44
+    dc_pin: GPIO10
+    reset_pin: GPIO38
+    busy_pin:
+      number: GPIO4
+      inverted: true
+    update_interval: never
+    lambda: |-
+      it.image(0, 0, id(dashboard_image));
+
+deep_sleep:
+  run_duration: 90s
+  sleep_duration: 30min

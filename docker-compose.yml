@@ -1,0 +1,28 @@
+services:
+  epaper-render:
+    build: .
+    image: local/epaper-render:latest
+    container_name: epaper-render
+    restart: unless-stopped
+    init: true
+    shm_size: 512m                  # Chromium needs more than Docker's 64 MB default
+    ports:
+      - "6161:8080"                 # the display fetches http://<host>:6161/display.png
+    environment:
+      TZ: America/Chicago
+      HA_BASE_URL: http://homeassistant.local:8123
+      HA_DASHBOARD_PATH: /my-dashboard/0?kiosk
+      HA_TOKEN: ${HA_TOKEN}         # long-lived access token, from .env
+      WIDTH: "800"
+      HEIGHT: "480"
+      RENDER_INTERVAL: "300"
+      DITHER_DIFFUSION: "65%"
+      STALE_ALERT_MINUTES: "30"
+      # Optional Telegram alert when no good render for STALE_ALERT_MINUTES
+      TG_TOKEN: ${TG_TOKEN:-}
+      TG_CHAT: ${TG_CHAT:-}
+    volumes:
+      - epaper-render-data:/data    # keeps the last good image across restarts
+
+volumes:
+  epaper-render-data:
