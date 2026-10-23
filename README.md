@@ -1,8 +1,8 @@
 # ha-epaper-render
 
-Turns a Home Assistant dashboard into an image for a colour e-paper display.
+Turns a Home Assistant dashboard into an image for a color e-paper display.
 This container screenshots the dashboard with headless Chromium, dithers the
-screenshot to the panel's 6-colour palette with ImageMagick, and serves it over
+screenshot to the panel's 6-color palette with ImageMagick, and serves it over
 HTTP. An ESPHome device downloads the image with `online_image` and draws it.
 
 Built for a Waveshare 7.3" Spectra E6 panel (800x480, black / white / red /
@@ -27,7 +27,7 @@ render cycle:
    the browser ended up on the HA login page, it logs that the token was
    rejected.
 5. Dithers to the palette (`-dither FloydSteinberg`, `dither:diffusion-amount`,
-   `-remap`) and writes a 6-colour paletted PNG.
+   `-remap`) and writes a 6-color paletted PNG.
 6. Publishes atomically (write a temp file, then rename), so the display never
    downloads a half-written file.
 
@@ -36,9 +36,9 @@ retries after `RETRY_SECONDS`. If there has been no good render for
 `STALE_ALERT_MINUTES`, it sends a Telegram alert, if one is configured, and
 sends another message when renders recover.
 
-**Text anti-aliasing is turned off on purpose** (`fonts-local.conf`). Grey
-anti-aliasing pixels have no close match in a 6-colour palette, so the dither
-scatters them into coloured specks around black text. With anti-aliasing off,
+**Text anti-aliasing is turned off on purpose** (`fonts-local.conf`). Gray
+anti-aliasing pixels have no close match in a 6-color palette, so the dither
+scatters them into colored specks around black text. With anti-aliasing off,
 text stays pure black, red or blue.
 
 ### Endpoints (port 8080 in the container)
@@ -115,7 +115,7 @@ volumes:
   epaper-render-data:
 ```
 
-With a three-colour (black/white/red) panel at a different size, change these:
+With a three-color (black/white/red) panel at a different size, change these:
 
 ```yaml
     environment:
@@ -149,13 +149,13 @@ before a release is cut.
 | `RENDER_TIMEOUT` | 45 | seconds to wait for the dashboard |
 | `SETTLE_SECONDS` | 5 | extra wait after cards appear |
 | `RETRY_SECONDS` | 60 | retry delay after a failed render |
-| `PALETTE` | `#FFFFFF #000000 #FF0000 #008000 #0000FF #FFFF00` | space-separated panel colours |
+| `PALETTE` | `#FFFFFF #000000 #FF0000 #008000 #0000FF #FFFF00` | space-separated panel colors |
 | `DITHER_DIFFUSION` | 65% | Floyd-Steinberg diffusion amount (lower means less noise) |
 | `MIN_STDDEV` | 0.05 | below this the screenshot counts as blank |
 | `STALE_ALERT_MINUTES` | 30 | alert after this long without a good render |
 | `TG_TOKEN` / `TG_CHAT` | unset | optional Telegram alerts |
 
-For another panel, change `PALETTE` to its colours, for example
+For another panel, change `PALETTE` to its colors, for example
 `#FFFFFF #000000 #FF0000` for a black/white/red panel.
 
 ## Troubleshooting
@@ -166,3 +166,7 @@ For another panel, change `PALETTE` to its colours, for example
 - **Blank or half-drawn image**: increase `SETTLE_SECONDS`.
 - **Missing emoji**: the image includes `fonts-noto-color-emoji`. Other
   symbols may need more font packages in the `Dockerfile`.
+
+## License
+
+[GPL-3.0](LICENSE)
