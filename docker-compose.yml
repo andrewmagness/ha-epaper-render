@@ -1,7 +1,7 @@
 services:
   epaper-render:
-    build: .
-    image: local/epaper-render:latest
+    image: ghcr.io/andrewmagness/ha-epaper-render:latest
+    # build: .                      # uncomment to build from this repo instead
     container_name: epaper-render
     restart: unless-stopped
     init: true

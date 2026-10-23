@@ -52,31 +52,43 @@ text stays pure black, red or blue.
 
 ## Install
 
+Images are published to GitHub Container Registry for `linux/amd64` and
+`linux/arm64`:
+
+```
+ghcr.io/andrewmagness/ha-epaper-render:latest     # newest release
+ghcr.io/andrewmagness/ha-epaper-render:1          # newest 1.x
+ghcr.io/andrewmagness/ha-epaper-render:1.0.0      # exact version
+```
+
 1. In Home Assistant, create a long-lived access token: Profile → Security →
    Long-lived access tokens. A dedicated non-admin user is a good idea.
 2. Build a dashboard sized for the panel. The kiosk-mode `?kiosk` URL
    parameter hides the header and sidebar.
-3. Clone this repo, then copy `.env.example` to `.env` and fill in `HA_TOKEN`
-   (and `TG_TOKEN` / `TG_CHAT` if you want alerts).
-4. Edit `docker-compose.yml` and set `HA_BASE_URL`, `HA_DASHBOARD_PATH`,
-   `WIDTH` / `HEIGHT`, and `TZ`.
-5. Run `docker compose up -d --build`.
+3. Create a folder with the `docker-compose.yml` below and a `.env` file:
+   ```
+   HA_TOKEN=your-long-lived-token
+   # optional
+   TG_TOKEN=
+   TG_CHAT=
+   ```
+4. Set `HA_BASE_URL`, `HA_DASHBOARD_PATH`, `WIDTH` / `HEIGHT`, and `TZ` in the
+   compose file.
+5. Run `docker compose up -d`.
 6. Open `http://<host>:6161/`. You should see the dithered image within a few
    seconds, and `/health` should report `"healthy": true`.
 7. Point the display's `online_image` URL at `http://<host>:6161/display.png`.
    See `esphome/online-image-snippet.yaml`.
 
-The image is built locally, so update it with `docker compose build --pull && docker compose up -d`.
+To update, run `docker compose pull && docker compose up -d`, or pin a version
+tag and bump it yourself.
 
 ### Compose example
-
-This is the `docker-compose.yml` in this repo, with secrets read from `.env`:
 
 ```yaml
 services:
   epaper-render:
-    build: .                        # Dockerfile in this repo
-    image: local/epaper-render:latest
+    image: ghcr.io/andrewmagness/ha-epaper-render:latest
     container_name: epaper-render
     restart: unless-stopped
     init: true
@@ -112,9 +124,18 @@ With a three-colour (black/white/red) panel at a different size, change these:
       PALETTE: "#FFFFFF #000000 #FF0000"
 ```
 
-If you manage stacks in a UI (Portainer, Dockhand, …) that can't build from a
-Dockerfile, build once with `docker build -t local/epaper-render:latest .` and
-remove the `build:` line. The stack then uses the local image.
+### Building it yourself
+
+Clone the repo, then either run `docker compose up -d --build` with the
+`build: .` line uncommented, or build it directly:
+`docker build -t local/epaper-render:latest .`
+
+## Releasing
+
+Pushing a tag such as `v1.2.3` runs `.github/workflows/release.yml`. It builds
+both architectures and publishes `1.2.3`, `1.2`, `1` and `latest` to ghcr.io.
+Pushes to `main` and pull requests only build, so a broken Dockerfile fails CI
+before a release is cut.
 
 ## Configuration
 
